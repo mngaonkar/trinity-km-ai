@@ -9,11 +9,32 @@ class GUI():
         self.chat = LLM(local_llm=constants.MODEL_NAME, base_url=constants.INFERENCE_URL)
 
     def run(self):
+        st.set_page_config(
+        page_title="Trinity AI",
+        page_icon=":robot_face:",
+        layout="wide",
+        )
+        
         st.title(constants.APP_NAME + " " + constants.APP_VERSION)
+
+        # create sidebar
+        st.sidebar.write("Navigation")
+  
+        # Create buttons in the sidebar
+        if st.sidebar.button("Home"):
+            selected_page = "Home"
+        elif st.sidebar.button("About"):
+            selected_page = "About"
+        elif st.sidebar.button("Contact"):
+            selected_page = "Contact"
+        elif st.sidebar.button("Settings"):
+            selected_page = "Settings"
+        else:
+            selected_page = "Home"  # Default page
 
         # prompt form
         with st.form(key='my_form'):
-            text = st.text_area('Enter text', 'what is the advice for learning AI?', height=200)
+            text = st.text_area('Ask question', 'what is the advice for learning AI?', height=200)
             submit_button = st.form_submit_button(label='Submit')
 
         # response text

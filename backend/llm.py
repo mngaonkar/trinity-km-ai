@@ -12,5 +12,10 @@ class LLM():
         for chunk in self.llm.stream(prompt):
             text += str(chunk.content)
             widget(text)
+
+    def stream_response(self, prompt):
+        """Stream a response from the LLM model."""
+        for chunk in self.llm.stream(prompt):
+            yield chunk.content
     
     
