@@ -1,18 +1,15 @@
 import streamlit as st
+from streamlit.components.v1 import html
 from langchain_community.chat_models import ChatOllama
 from backend.llm import LLM
-
-INFERENCE_URL = "http://localhost:11434"
-MODEL_NAME = "llama3"
+import constants
 
 class GUI():
     def __init__(self):
-        self.chat = LLM(local_llm=MODEL_NAME, base_url=INFERENCE_URL)
+        self.chat = LLM(local_llm=constants.MODEL_NAME, base_url=constants.INFERENCE_URL)
 
     def run(self):
-        chat = LLM(local_llm=MODEL_NAME, base_url=INFERENCE_URL)
-
-        st.title("Trinity v1.0")
+        st.title(constants.APP_NAME + " " + constants.APP_VERSION)
 
         # prompt form
         with st.form(key='my_form'):
@@ -44,8 +41,7 @@ class GUI():
 
         # submit button action handler
         if submit_button:
-                chat.generate_response(text, update_response_text)
-        
+                self.chat.generate_response(text, update_response_text)
 
 
         

@@ -2,6 +2,8 @@ from click import prompt
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 import llm
+from retriever import Retriever
+import constants
 
 class Pipeline():
     """Pipeline class for processing data"""
@@ -18,9 +20,16 @@ class Pipeline():
         """,
         input_variables=["question", "document"],
         )
-        self.llm = llm.LLM(local_llm="llama2", base_url="http://localhost:11434")
+        self.llm = llm.LLM(local_llm=constants.MODEL_NAME, base_url=constants.INFERENCE_URL)
+        self.retriver = Retriever()
 
         self.rag_chain = self.prompt | self.llm.llm | StrOutputParser()
+        self.db = self.retriver.create_vector_db()
 
+    def generate_response(self, question, document):
+        """Generate a response from the LLM model."""
+        docs = self.retriver.query_document(self.db, question)
+        response = self.rag_chain.invoke({"content": docs, "question": question})
 
+        return response
     

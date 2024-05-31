@@ -1,0 +1,5 @@
+# INFERENCE_URL = "http://10.0.0.147:11434"
+INFERENCE_URL = "http://localhost:11434"
+MODEL_NAME = "llama3"
+APP_NAME = "Trinity"
+APP_VERSION = "v1.0"
