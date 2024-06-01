@@ -4,3 +4,5 @@ MODEL_NAME = "llama3"
 APP_NAME = "Trinity"
 APP_VERSION = "v1.0"
 TEMPERATURE = 0.6
+GOOGLE_AUTH_CLIENT_ID = "255024374055-7p2p3pjh1usib8pu0k0a6vn7josvj4bm.apps.googleusercontent.com"
+GOOGLE_AUTH_CLIENT_SECRET = "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"
