@@ -1,13 +1,16 @@
+from multiprocessing import Pipe
 import streamlit as st
 from streamlit.components.v1 import html
 from langchain_community.chat_models import ChatOllama
 import constants
 from langchain_core.language_models import LanguageModelInput
+from backend.pipeline import Pipeline
 from backend.llm import LLM
 
 class ChatGUI():
     def __init__(self):
-        self.chat = LLM(local_llm=constants.MODEL_NAME, base_url=constants.INFERENCE_URL)
+        # self.chat = LLM(local_llm=constants.MODEL_NAME, base_url=constants.INFERENCE_URL)
+        self.chat = Pipeline()
 
     def run(self):
         # Set the page configuration

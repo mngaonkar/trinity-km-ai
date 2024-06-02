@@ -5,10 +5,10 @@ from streamlit_google_auth import Authenticate
 class Login():
     def __init__(self) -> None:
         self.authenticator = Authenticate(
-                secret_credentials_path='/Users/mahadev/Downloads/client_secret_255024374055-7p2p3pjh1usib8pu0k0a6vn7josvj4bm.apps.googleusercontent.com.json',
+                secret_credentials_path=constants.GOOGLE_CLIENT_SECRET_JSON,
                 cookie_name='my_cookie_name',
                 cookie_key='this_is_secret',
-                redirect_uri='https://console.altbox.one:8501',
+                redirect_uri=constants.REDIRECT_URL,
             )
 
     def run(self):
