@@ -7,7 +7,7 @@ class Database():
         """Create a vector database with a single text."""
         self.embeddings = GPT4AllEmbeddings(model_name=constants.EMBEDDING_MODEL) # type: ignore
         self.vectorstore = Milvus.from_texts(
-            texts=["Milvus is a vector store for efficient similarity search and clustering of dense vectors."],
+            texts=[" "],
             embedding=self.embeddings,
             connection_args={
                 "uri": db_name,
@@ -21,5 +21,5 @@ class Database():
 
     def query_document(self, query):
         """Query a document in the vector database."""
-        docs = self.vectorstore.similarity_search(query, k=3)
+        docs = self.vectorstore.similarity_search(query, k=constants.NO_DOCS_PER_QUERY)
         return docs

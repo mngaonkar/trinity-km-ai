@@ -6,12 +6,6 @@ import constants
 
 class DocumentLoader():
     """Storer class for storing data."""
-    def __init__(self, db):
-        self.db = db
-
-    def store(self, data):
-        self.db.store(data)
-
     def load_web_document(self, url):
         """Load a document from a URL."""
         loader = WebBaseLoader(url)

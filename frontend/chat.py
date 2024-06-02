@@ -5,12 +5,23 @@ from langchain_community.chat_models import ChatOllama
 import constants
 from langchain_core.language_models import LanguageModelInput
 from backend.pipeline import Pipeline
+from backend.loader import DocumentLoader
 from backend.llm import LLM
 
 class ChatGUI():
     def __init__(self):
         # self.chat = LLM(local_llm=constants.MODEL_NAME, base_url=constants.INFERENCE_URL)
         self.chat = Pipeline()
+        self.loader = DocumentLoader()
+        self.init_vectorstore()
+
+    def init_vectorstore(self):
+        webpage = "https://www.nifty.org/nifty/bisexual/adult-friends/debauchery-of-a-young-indian-housewife/debauchery-of-a-young-indian-housewife-"
+       
+        for i in range(1, 6):
+            url = webpage + str(i)
+            docs = self.loader.load_web_document(url)
+            self.chat.db.vectorstore.add_documents(docs)
 
     def run(self):
         # Set the page configuration
