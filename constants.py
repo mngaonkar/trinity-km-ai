@@ -11,9 +11,9 @@ REDIRECT_URL = "https://console.altbox.one:8501"
 VECTOR_DB_NAME_DEFAULT = "default.db"
 
 # Embedding configurations
-CHUNK_SIZE = 500
+CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 0
-NO_DOCS_PER_QUERY = 5
+NO_DOCS_PER_QUERY = 10
 
 EMBEDDING_MODEL = "all-MiniLM-L6-v2.gguf2.f16.gguf"
 MAX_CHAT_HISTORY = 20

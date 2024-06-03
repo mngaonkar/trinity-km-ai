@@ -1,14 +1,21 @@
+from bz2 import compress
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_core.chat_history import BaseChatMessageHistory
+from zmq import Context
 from backend import llm
 from backend.database import Database
+from backend.utils import pretty_print_docs
 import constants
 from loguru import logger
 from langchain.callbacks.tracers import ConsoleCallbackHandler
+from langchain.retrievers.document_compressors import FlashrankRerank
+from langchain.retrievers import ContextualCompressionRetriever
 
+from langchain.retrievers.document_compressors.cross_encoder_rerank import CrossEncoderReranker
+from langchain_community.cross_encoders import HuggingFaceCrossEncoder
 
 class Pipeline():
     """Pipeline class for processing data"""
@@ -36,9 +43,32 @@ class Pipeline():
         def format_docs(docs):
             return "\n\n".join(doc.page_content for doc in docs)
         
+        def get_context_with_reranked_docs_bge(prompt):
+            """Get the context of the conversation with reranked documents (BGE)."""
+            model = HuggingFaceCrossEncoder(model_name="BAAI/bge-reranker-base")
+            compressor = CrossEncoderReranker(model=model, top_n=10)
+            compression_retriever = ContextualCompressionRetriever(
+                base_compressor=compressor, base_retriever=self.retriever
+            )
+
+            compressed_docs = compression_retriever.invoke("What is the plan for the economy?")
+            pretty_print_docs(compressed_docs)
+
+            return format_docs(compressed_docs)
+
+        def get_context_with_reranked_docs(prompt):
+            """Get the context of the conversation with reranked documents."""
+            compressor = FlashrankRerank(top_n=10)
+            compression_retriever = ContextualCompressionRetriever(base_compressor=compressor, 
+                                                                   base_retriever=self.retriever)
+            compressed_docs = compression_retriever.invoke(prompt)
+            pretty_print_docs(compressed_docs)
+            return format_docs(compressed_docs)
+        
         def get_context(prompt):
             """Get the context of the conversation."""
             docs = self.db.query_document(prompt)
+            pretty_print_docs(docs)
             return format_docs(docs)
             
         # build the pipeline
@@ -60,7 +90,6 @@ class Pipeline():
     
     def stream_response(self, prompt):
         """Stream a response from the LLM model."""
-        logger.debug(self.retriever.invoke(prompt))
         for chunk in self.rag_chain.stream(prompt,
                                            config={'callbacks': [ConsoleCallbackHandler()]}):
             yield chunk
