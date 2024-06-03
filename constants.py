@@ -13,7 +13,7 @@ VECTOR_DB_NAME_DEFAULT = "default.db"
 # Embedding configurations
 CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 0
-NO_DOCS_PER_QUERY = 10
+NO_DOCS_PER_QUERY = 20
 
 EMBEDDING_MODEL = "all-MiniLM-L6-v2.gguf2.f16.gguf"
 MAX_CHAT_HISTORY = 20
