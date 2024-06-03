@@ -6,18 +6,22 @@ from langchain_core.chat_history import BaseChatMessageHistory
 from backend import llm
 from backend.database import Database
 import constants
+from loguru import logger
+from langchain.callbacks.tracers import ConsoleCallbackHandler
+
 
 class Pipeline():
     """Pipeline class for processing data"""
+    chat_history = []
+
     def __init__(self):
         self.prompt = PromptTemplate(
         template="""
         <|begin_of_text|>
         <|start_header_id|>system<|end_header_id|>
-        you are an AI assistent
+        {history}
         <|eot_id|>
         <|start_header_id|>user<|end_header_id|>
-        {history}
         {context}
         {question}
         <|eot_id|>
@@ -32,13 +36,18 @@ class Pipeline():
         def format_docs(docs):
             return "\n\n".join(doc.page_content for doc in docs)
         
+        def get_context(prompt):
+            """Get the context of the conversation."""
+            docs = self.db.query_document(prompt)
+            return format_docs(docs)
+            
+        # build the pipeline
         self.rag_chain = (
-            {"history":self.get_session_history, "context": self.retriever | format_docs, "question": RunnablePassthrough()}
+            {"history":self.get_session_history, "context": get_context, "question": RunnablePassthrough()}
             | self.prompt
             | self.llm.llm
             | StrOutputParser()
         )
-        self.store = {}
 
     def generate_response(self, query):
         """Generate a response from the LLM model."""
@@ -51,12 +60,15 @@ class Pipeline():
     
     def stream_response(self, prompt):
         """Stream a response from the LLM model."""
-        print(self.retriever.invoke(prompt))
-        for chunk in self.rag_chain.stream(prompt):
+        logger.debug(self.retriever.invoke(prompt))
+        for chunk in self.rag_chain.stream(prompt,
+                                           config={'callbacks': [ConsoleCallbackHandler()]}):
             yield chunk
 
-    def get_session_history(self, session_id: str) -> BaseChatMessageHistory:
-        if session_id not in self.store:
-            self.store[session_id] = ChatMessageHistory()
-        return self.store[session_id]
     
+    def get_session_history(self, prompt):
+        logger.info(f"length of chat history: {len(self.chat_history)}")
+        if len(self.chat_history) > constants.MAX_CHAT_HISTORY:
+            logger.info("chat history is greater than max chat history, truncating...")
+            self.chat_history = self.chat_history[-constants.MAX_CHAT_HISTORY:]
+        return " ".join(self.chat_history)

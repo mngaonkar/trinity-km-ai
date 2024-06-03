@@ -16,12 +16,16 @@ class ChatGUI():
         self.init_vectorstore()
 
     def init_vectorstore(self):
-        webpage = "https://www.nifty.org/nifty/bisexual/adult-friends/debauchery-of-a-young-indian-housewife/debauchery-of-a-young-indian-housewife-"
+        # webpage = "https://www.nifty.org/nifty/bisexual/adult-friends/debauchery-of-a-young-indian-housewife/debauchery-of-a-young-indian-housewife-"
        
-        for i in range(1, 6):
-            url = webpage + str(i)
-            docs = self.loader.load_web_document(url)
-            self.chat.db.vectorstore.add_documents(docs)
+        # for i in range(1, 6):
+        #     url = webpage + str(i)
+        #     docs = self.loader.load_web_document(url)
+        #     self.chat.db.vectorstore.add_documents(docs)
+        
+        webpage = "https://gutenberg.org/cache/epub/1661/pg1661.txt"
+        docs = self.loader.load_web_document(webpage)
+        self.chat.db.vectorstore.add_documents(docs)
 
     def run(self):
         # Set the page configuration
@@ -58,4 +62,8 @@ class ChatGUI():
             with st.chat_message("assistant"):
                 stream = self.chat.stream_response(prompt)
             response = st.write_stream(stream)
+
+            # Add assistant response to chat history
+            self.chat.chat_history.append(prompt)
+            self.chat.chat_history.append(response)
             st.session_state.messages.append({"role": "assistant", "content": response})
