@@ -33,7 +33,9 @@ class ChatGUI():
 
         doc_location = constants.DOCS_LOCATION
         docs = self.loader.load_documents_from_directory(doc_location)
+        logger.info(f"Adding {len(docs)} documents to vector store")
         self.chat.db.vectorstore.add_documents(docs)
+        logger.info("Done.")
 
     def run(self):
         # Set the page configuration

@@ -39,7 +39,7 @@ class DocumentLoader():
         file_names = []
         for root, dirs, files in os.walk(doc_location):
             for file in files:
-                logger.info(f"Loading document from file {file}")    
+                logger.info(f"Found file {file}")    
                 if file.endswith("." + file_type):
                     file_names.append(os.path.join(root, file))
 
@@ -48,10 +48,12 @@ class DocumentLoader():
         docs_content = []
 
         for file in file_names:
-            logger.info(f"Loading document from {file}")
+            logger.info(f"Splitting document {file}")
             loader = PyPDFLoader(file)
             document = loader.load()
             split_documents = text_splitter.split_documents(document)
             docs_content.extend(split_documents)  
+            logger.info(f"Document {file} split into {len(split_documents)} parts")
            
+        logger.info(f"Loaded {len(file_names)} documents from location {doc_location}")
         return docs_content
