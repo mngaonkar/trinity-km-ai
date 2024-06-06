@@ -1,4 +1,5 @@
 from multiprocessing import Pipe
+from venv import logger
 import streamlit as st
 from streamlit.components.v1 import html
 from langchain_community.chat_models import ChatOllama
@@ -7,6 +8,8 @@ from langchain_core.language_models import LanguageModelInput
 from backend.pipeline import Pipeline
 from backend.loader import DocumentLoader
 from backend.llm import LLM
+import constants
+from loguru import logger
 
 class ChatGUI():
     def __init__(self):
@@ -16,16 +19,21 @@ class ChatGUI():
         self.init_vectorstore()
 
     def init_vectorstore(self):
-        webpage = "https://www.nifty.org/nifty/bisexual/adult-friends/debauchery-of-a-young-indian-housewife/debauchery-of-a-young-indian-housewife-"
+        logger.info("Initializing vector store")
+        # webpage = "https://www.nifty.org/nifty/bisexual/adult-friends/debauchery-of-a-young-indian-housewife/debauchery-of-a-young-indian-housewife-"
        
-        for i in range(1, 6):
-            url = webpage + str(i)
-            docs = self.loader.load_web_document(url)
-            self.chat.db.vectorstore.add_documents(docs)
+        # for i in range(1, 6):
+        #     url = webpage + str(i)
+        #     docs = self.loader.load_web_document(url)
+        #     self.chat.db.vectorstore.add_documents(docs)
         
         # webpage = "https://gutenberg.org/cache/epub/1661/pg1661.txt"
         # docs = self.loader.load_web_document(webpage)
         # self.chat.db.vectorstore.add_documents(docs)
+
+        doc_location = constants.DOCS_LOCATION
+        docs = self.loader.load_documents_from_directory(doc_location)
+        self.chat.db.vectorstore.add_documents(docs)
 
     def run(self):
         # Set the page configuration

@@ -17,3 +17,5 @@ NO_DOCS_PER_QUERY = 20
 
 EMBEDDING_MODEL = "all-MiniLM-L6-v2.gguf2.f16.gguf"
 MAX_CHAT_HISTORY = 20
+
+DOCS_LOCATION = "/Users/mahadevgaonkar/Documents/Guides"
