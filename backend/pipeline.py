@@ -17,7 +17,7 @@ from langchain.retrievers import ContextualCompressionRetriever
 from langchain.retrievers.document_compressors.cross_encoder_rerank import CrossEncoderReranker
 from langchain_community.cross_encoders import HuggingFaceCrossEncoder
 from backend.vectorstore import VectorStore
-from backend.llm import LLM
+from backend.llm import LLM, LLM2
 
 
 class Pipeline():
@@ -46,7 +46,8 @@ class Pipeline():
         )
 
     def setup_large_language_model(self, llm = constants.MODEL_NAME, base_url = constants.INFERENCE_URL):
-        self.llm = LLM(local_llm=constants.MODEL_NAME, base_url=constants.INFERENCE_URL)
+        # self.llm = LLM(local_llm=constants.MODEL_NAME, base_url=constants.INFERENCE_URL)
+        self.llm = LLM2(local_llm=constants.MODEL_NAME, base_url="http://10.0.0.147:8080")
 
     def setup(self, vector_store: VectorStore):
         self.vector_store = vector_store
