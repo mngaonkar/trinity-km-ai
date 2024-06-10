@@ -1,5 +1,6 @@
-INFERENCE_URL = "http://10.0.0.147:11434"
-# INFERENCE_URL = "http://localhost:11434"
+INFERENCE_URL_OLLAMA = "http://10.0.0.147:11434"
+INFERENCE_URL_LLAMA_CPP = "http://10.0.0.147:8080"
+INFERENCE_URL_OLLAMA_LOCAL = "http://localhost:11434"
 MODEL_NAME = "llama3-uncensored"
 APP_NAME = "Trinity"
 APP_VERSION = "v1.0"
