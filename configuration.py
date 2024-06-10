@@ -24,31 +24,45 @@ class Configuration(object):
         self._config[key] = value
         json.dump(self._config, open(self.config_file, "w"))
 
-    def get_vector_store_config(self):
-        return VectorStoreConfig(self)
+    def get_vector_store_config(self, database_name: str):
+        return VectorStoreConfig(self, database_name)
     
     def get_config(self):
         return self._config
     
     def create_new_config(self):
-        self._config = {"vector_store": {"status": VectorStoreStatus.NOT_INTIALIZED.value}}
+        self._config = {}
         json.dump(self._config, open(self.config_file, "w"))
 
 class VectorStoreConfig():
     """Class for storing vector store configuration."""
-    def __init__(self, config_obj: Configuration) -> None:
+    KEY_VECTOR_STORES = "vector_stores"
+    def __init__(self, config_obj: Configuration, database_name: str) -> None:
         self._config_obj = config_obj
+        self.database_name = database_name
 
     def get_vector_store_status(self):
-        return self._config_obj._config["vector_store"]["status"]
+        try:
+            if self.database_name not in self._config_obj._config["vector_stores"]:
+                return VectorStoreStatus.NOT_INTIALIZED
+        except KeyError:
+            return VectorStoreStatus.NOT_INTIALIZED
+        
+        return self._config_obj._config[self.KEY_VECTOR_STORES][self.database_name]["status"]
     
     def set_vector_store_status(self, status: VectorStoreStatus):
-        self._config_obj._config["vector_store"]["status"] = status.value
+        if self.KEY_VECTOR_STORES not in self._config_obj._config:
+            self._config_obj._config[self.KEY_VECTOR_STORES] = {}
+
+        if self.database_name not in self._config_obj._config[self.KEY_VECTOR_STORES]:
+            self._config_obj._config[self.KEY_VECTOR_STORES][self.database_name] = {}
+            
+        self._config_obj._config[self.KEY_VECTOR_STORES][self.database_name]["status"] = status.value
         return self
 
     def get_config(self):
-        return self._config_obj._config["vector_store"]
+        return self._config_obj._config[self.KEY_VECTOR_STORES]
     
     def save_config(self):
-        self._config_obj.save_increamental_config("vector_store", self._config_obj._config["vector_store"])
+        self._config_obj.save_increamental_config(self.KEY_VECTOR_STORES, self._config_obj._config[self.KEY_VECTOR_STORES])
     

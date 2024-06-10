@@ -20,7 +20,7 @@ MAX_CHAT_HISTORY = 20
 
 DEFAULT_CONFIF_FILE = "config.json"
 
-# DOCS_LOCATION = "/Users/mahadevgaonkar/Documents/Guides"
-DOCS_LOCATION = "/Users/mahadevgaonkar/Documents/story-of-women"
+DOCS_LOCATION = "/Users/mahadevgaonkar/Documents/Guides"
+# DOCS_LOCATION = "/Users/mahadevgaonkar/Documents/story-of-women"
 
 DOC_URL = "example.com"

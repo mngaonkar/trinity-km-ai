@@ -1,7 +1,10 @@
+from sys import path
 from venv import logger
 from langchain_milvus import Milvus
 from langchain_community.embeddings import GPT4AllEmbeddings
 import constants
+import os
+from loguru import logger
 
 class Database():
     def __init__(self, db_name = "milvus_demo.db", collection_name = "milvus_demo"):
@@ -10,23 +13,26 @@ class Database():
         self.collection_name = collection_name
         self.embeddings = GPT4AllEmbeddings(model_name=constants.EMBEDDING_MODEL) # type: ignore
         
-
-    def create_database(self):
+    def check_db_presence(self, db_name):
+        """Check if the database is present."""
+        return os.path.exists(db_name)
+    
+    def create_database(self, db_name):
         self.vector_db = Milvus.from_texts(
             texts=[" "],
             embedding=self.embeddings,
             connection_args={
-                "uri": self.db_name,
+                "uri": db_name,
                 "collection_name": self.collection_name,},
             drop_old=True,  # Drop the old Milvus collection if it exists
     )   
 
-    def load_database(self):
+    def load_database(self, db_name):
         self.vector_db = Milvus.from_texts(
             texts=[" "],
             embedding=self.embeddings,
             connection_args={
-                "uri": self.db_name,
+                "uri": db_name,
                 "collection_name": self.collection_name,},
             drop_old=False,  # Keep the old Milvus collection if it exists
         )
