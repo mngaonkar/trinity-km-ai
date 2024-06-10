@@ -16,12 +16,20 @@ from langchain.retrievers import ContextualCompressionRetriever
 
 from langchain.retrievers.document_compressors.cross_encoder_rerank import CrossEncoderReranker
 from langchain_community.cross_encoders import HuggingFaceCrossEncoder
+from backend.vectorstore import VectorStore
+from backend.llm import LLM
+
 
 class Pipeline():
     """Pipeline class for processing data"""
     chat_history = []
 
     def __init__(self):
+        self.setup_prompt_tepmlate()
+        self.setup_large_language_model()
+        self.vector_store = None
+        
+    def setup_prompt_tepmlate(self, template=None):
         self.prompt = PromptTemplate(
         template="""
         <|begin_of_text|>
@@ -36,9 +44,22 @@ class Pipeline():
         """,
         input_variables=["history", "context", "question"],
         )
-        self.llm = llm.LLM(local_llm=constants.MODEL_NAME, base_url=constants.INFERENCE_URL)
-        self.db = Database()
-        self.retriever = self.db.vectorstore.as_retriever()
+
+    def setup_large_language_model(self, llm = constants.MODEL_NAME, base_url = constants.INFERENCE_URL):
+        self.llm = LLM(local_llm=constants.MODEL_NAME, base_url=constants.INFERENCE_URL)
+
+    def setup(self, vector_store: VectorStore):
+        self.vector_store = vector_store
+        self.vector_store.init_vectorstore(constants.DOCS_LOCATION)
+        self.setup_pipeline()
+        logger.info("Pipeline setup complete.")
+    
+    def setup_pipeline(self):
+        """Setup the pipeline for the chatbot."""
+        if self.vector_store is None:
+            raise ValueError("Vector store not initialized.")
+        
+        self.retriever = self.vector_store.database.vector_db.as_retriever()
 
         def format_docs(docs):
             return "\n\n".join(doc.page_content for doc in docs)
@@ -67,9 +88,15 @@ class Pipeline():
         
         def get_context(prompt):
             """Get the context of the conversation."""
-            docs = self.db.query_document(prompt)
-            pretty_print_docs(docs)
-            return format_docs(docs)
+            doc_list = []
+            if self.vector_store is not None:
+                docs = self.vector_store.database.query_document(prompt)
+                for index, (doc, score) in enumerate(docs):
+                    logger.info(f"Document {index} score: {score}")
+                    doc_list.append(doc)
+
+                pretty_print_docs(doc_list)
+            return format_docs(doc_list)
             
         # build the pipeline
         self.rag_chain = (
@@ -78,6 +105,9 @@ class Pipeline():
             | self.llm.llm
             | StrOutputParser()
         )
+
+    def setup_vector_store(self, store: VectorStore):
+            self.vector_store = store
 
     def generate_response(self, query):
         """Generate a response from the LLM model."""

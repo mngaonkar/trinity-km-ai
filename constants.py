@@ -1,5 +1,5 @@
-# INFERENCE_URL = "http://10.0.0.147:11434"
-INFERENCE_URL = "http://localhost:11434"
+INFERENCE_URL = "http://10.0.0.147:11434"
+# INFERENCE_URL = "http://localhost:11434"
 MODEL_NAME = "llama3-uncensored"
 APP_NAME = "Trinity"
 APP_VERSION = "v1.0"
@@ -18,4 +18,9 @@ NO_DOCS_PER_QUERY = 20
 EMBEDDING_MODEL = "all-MiniLM-L6-v2.gguf2.f16.gguf"
 MAX_CHAT_HISTORY = 20
 
-DOCS_LOCATION = "/Users/mahadevgaonkar/Documents/Guides"
+DEFAULT_CONFIF_FILE = "config.json"
+
+# DOCS_LOCATION = "/Users/mahadevgaonkar/Documents/Guides"
+DOCS_LOCATION = "/Users/mahadevgaonkar/Documents/story-of-women"
+
+DOC_URL = "example.com"

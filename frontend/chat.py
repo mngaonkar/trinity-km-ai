@@ -1,8 +1,10 @@
+from math import log
 from multiprocessing import Pipe
 from venv import logger
 import streamlit as st
 from streamlit.components.v1 import html
 from langchain_community.chat_models import ChatOllama
+from backend.vectorstore import VectorStore
 import constants
 from langchain_core.language_models import LanguageModelInput
 from backend.pipeline import Pipeline
@@ -12,30 +14,14 @@ import constants
 from loguru import logger
 
 class ChatGUI():
-    def __init__(self):
-        # self.chat = LLM(local_llm=constants.MODEL_NAME, base_url=constants.INFERENCE_URL)
-        self.chat = Pipeline()
-        self.loader = DocumentLoader()
-        self.init_vectorstore()
+    """Chat GUI class for displaying chat messages."""
+    def __init__(self, pipeline: Pipeline):
+        logger.info("Initializing chat GUI...")
+        self.chat = pipeline
+        logger.info("Chat GUI initialized.")
 
-    def init_vectorstore(self):
-        logger.info("Initializing vector store")
-        # webpage = "https://www.nifty.org/nifty/bisexual/adult-friends/debauchery-of-a-young-indian-housewife/debauchery-of-a-young-indian-housewife-"
-       
-        # for i in range(1, 6):
-        #     url = webpage + str(i)
-        #     docs = self.loader.load_web_document(url)
-        #     self.chat.db.vectorstore.add_documents(docs)
-        
-        # webpage = "https://gutenberg.org/cache/epub/1661/pg1661.txt"
-        # docs = self.loader.load_web_document(webpage)
-        # self.chat.db.vectorstore.add_documents(docs)
-
-        doc_location = constants.DOCS_LOCATION
-        docs = self.loader.load_documents_from_directory(doc_location)
-        logger.info(f"Adding {len(docs)} documents to vector store")
-        self.chat.db.vectorstore.add_documents(docs)
-        logger.info("Done.")
+    def set_vector_store(self, store: VectorStore):
+        self.vector_store = store
 
     def run(self):
         # Set the page configuration
@@ -77,3 +63,5 @@ class ChatGUI():
             self.chat.chat_history.append(prompt)
             self.chat.chat_history.append(response)
             st.session_state.messages.append({"role": "assistant", "content": response})
+        else:
+            st.stop()
