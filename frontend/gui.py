@@ -6,7 +6,7 @@ import constants
 
 class GUI():
     def __init__(self):
-        self.chat = LLM(local_llm=constants.MODEL_NAME, base_url=constants.INFERENCE_URL)
+        self.chat = LLM(local_llm=constants.MODEL_NAME, base_url=constants.INFERENCE_URL_OLLAMA)
 
     def run(self):
         st.set_page_config(

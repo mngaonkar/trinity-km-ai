@@ -8,9 +8,13 @@ from langchain_community.embeddings import GPT4AllEmbeddings
 import constants
 import os
 from loguru import logger
+from configuration import Configuration
 
 class DocumentLoader():
     """Storer class for storing data."""
+    def __init__(self, config: Configuration):
+        self.config = config
+
     def load_web_document(self, url):
         """Load a document from a URL."""
         loader = WebBaseLoader(url)

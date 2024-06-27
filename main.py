@@ -20,7 +20,7 @@ def main():
         config.create_new_config()
         logger.info("Configuration file created.")
 
-    loader = DocumentLoader()
+    loader = DocumentLoader(config)
     vector_store = VectorStore(loader, config)
     pipeline = Pipeline()
     pipeline.setup(vector_store)
