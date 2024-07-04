@@ -25,10 +25,12 @@ class Pipeline():
     chat_history = []
 
     def __init__(self):
-        self.setup_prompt_tepmlate()
-        self.setup_large_language_model()
-        self.vector_store = None
+        pass
         
+    def setup_session_state(self, session_state = {}):
+        """User specific session data"""
+        self.session_state = session_state
+
     def setup_prompt_tepmlate(self, template=None):
         self.prompt = PromptTemplate(
         template="""
@@ -46,10 +48,13 @@ class Pipeline():
         )
 
     def setup_large_language_model(self, llm = constants.MODEL_NAME, base_url = constants.INFERENCE_URL_OLLAMA_LOCAL):
-        # self.llm = LLMOllama(local_llm=constants.MODEL_NAME, base_url=constants.INFERENCE_URL_OLLAMA)
-        self.llm = LLMLlamaCpp(local_llm=constants.MODEL_NAME, base_url=constants.INFERENCE_URL_LLAMA_CPP)
+        self.llm = LLMOllama(local_llm=constants.MODEL_NAME, base_url=constants.INFERENCE_URL_OLLAMA_LOCAL)
+        # self.llm = LLMLlamaCpp(local_llm=constants.MODEL_NAME, base_url=constants.INFERENCE_URL_LLAMA_CPP_LOCAL)
 
     def setup(self, vector_store: VectorStore):
+        """Overall setup."""
+        self.setup_prompt_tepmlate()
+        self.setup_large_language_model()
         self.vector_store = vector_store
         self.vector_store.init_vectorstore(constants.DOCS_LOCATION)
         self.setup_pipeline()
@@ -87,6 +92,10 @@ class Pipeline():
             pretty_print_docs(compressed_docs)
             return format_docs(compressed_docs)
         
+        def get_no_context(prompt):
+            """Return no context."""
+            return ""
+        
         def get_context(prompt):
             """Get the context of the conversation."""
             doc_list = []
@@ -100,12 +109,20 @@ class Pipeline():
             return format_docs(doc_list)
             
         # build the pipeline
-        self.rag_chain = (
-            {"history":self.get_session_history, "context": get_context, "question": RunnablePassthrough()}
-            | self.prompt
-            | self.llm.llm
-            | StrOutputParser()
-        )
+        if "augmented_flag" in self.session_state and self.session_state["augmented_flag"]:
+            self.rag_chain = (
+                {"history":self.get_session_history, "context": get_context, "question": RunnablePassthrough()}
+                | self.prompt
+                | self.llm.llm
+                | StrOutputParser()
+            )
+        else:
+            self.rag_chain = (
+                {"history":self.get_session_history, "context": get_no_context, "question": RunnablePassthrough()}
+                | self.prompt
+                | self.llm.llm
+                | StrOutputParser()
+            )
 
     def setup_vector_store(self, store: VectorStore):
             self.vector_store = store

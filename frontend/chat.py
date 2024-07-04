@@ -15,24 +15,43 @@ from loguru import logger
 
 class ChatGUI():
     """Chat GUI class for displaying chat messages."""
-    def __init__(self, pipeline: Pipeline):
+    def __init__(self, pipeline: Pipeline, vector_store: VectorStore):
         logger.info("Initializing chat GUI...")
-        self.chat = pipeline
+        self.pipeline = pipeline
+        self.pipeline.setup_session_state(st.session_state)
+        pipeline.setup(vector_store)
+        
         logger.info("Chat GUI initialized.")
 
     def set_vector_store(self, store: VectorStore):
         self.vector_store = store
 
+    def model_changed(self):
+        """Model changed."""
+        pass
+
+    def augmented_flag_changed(self):
+        """Augmented flag changed."""
+        self.pipeline.setup_pipeline()
+
     def run(self):
         # Set the page configuration
         st.set_page_config(
-            page_title="Trinity AI",
+            page_title=constants.APP_NAME,
             page_icon=":speech_balloon:",
             layout="wide",
         )
 
         st.title(constants.APP_NAME + " " + constants.APP_VERSION)
         chat_container = st.container()
+        sidebar_container = st.sidebar.container()
+
+        # Save use specific settings in session state
+        st.session_state["model"] = sidebar_container.selectbox("Model", constants.MODELS, on_change=self.model_changed)
+        st.session_state["augmented_flag"] = sidebar_container.checkbox("Augmented", value=False, on_change=self.augmented_flag_changed) 
+        if st.session_state["augmented_flag"]:
+            # show a select box for the dataset selection
+            st.session_state["dataset"] = sidebar_container.selectbox("Dataset", constants.DATASETS)
         
         # Set a default model
         if "model" not in st.session_state:
@@ -47,21 +66,21 @@ class ChatGUI():
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
 
-        if prompt := st.chat_input("What is up?"):
+        if prompt := st.chat_input("What's up?"):
             # Add user message to chat history
             st.session_state.messages.append({"role": "user", "content": prompt})
             # Display user message in chat message container
             with st.chat_message("user"):
                 st.markdown(prompt)
 
-            # Display assistant response in chat message container
+            # Send message to assistant and display response
             with st.chat_message("assistant"):
-                stream = self.chat.stream_response(prompt)
+                stream = self.pipeline.stream_response(prompt)
             response = st.write_stream(stream)
 
             # Add assistant response to chat history
-            self.chat.chat_history.append(prompt)
-            self.chat.chat_history.append(response)
+            self.pipeline.chat_history.append(prompt)
+            self.pipeline.chat_history.append(response)
             st.session_state.messages.append({"role": "assistant", "content": response})
         else:
             st.stop()

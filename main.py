@@ -23,8 +23,7 @@ def main():
     loader = DocumentLoader(config)
     vector_store = VectorStore(loader, config)
     pipeline = Pipeline()
-    pipeline.setup(vector_store)
-    gui = ChatGUI(pipeline)
+    gui = ChatGUI(pipeline, vector_store)
 
     gui.run()
 

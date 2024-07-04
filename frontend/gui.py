@@ -10,7 +10,7 @@ class GUI():
 
     def run(self):
         st.set_page_config(
-        page_title="Trinity AI",
+        page_title=constants.APP_NAME,
         page_icon=":robot_face:",
         layout="wide",
         )
