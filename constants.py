@@ -1,3 +1,6 @@
+from backend.llm_provider import LLMProvider
+
+
 INFERENCE_URL_OLLAMA = "http://10.0.0.147:11434"
 INFERENCE_URL_LLAMA_CPP = "http://10.0.0.147:8080"
 INFERENCE_URL_LLAMA_CPP_LOCAL = "http://localhost:8080"
@@ -28,3 +31,6 @@ DOCS_LOCATION = "/Users/mahadevgaonkar/Documents/Guides"
 # DOCS_LOCATION = "/Users/mahadevgaonkar/Documents/story-of-women"
 
 DOC_URL = "example.com"
+
+LLM_PROVIDERS = ["ollama", "llama-cpp"] 
+LLM_PROVIDER_OLLAMA = "ollama"

@@ -1,11 +1,13 @@
+from abc import ABC, abstractmethod
 from langchain_community.chat_models import ChatOllama
 from langchain_community.llms import LlamaCpp
 from langchain_openai import ChatOpenAI
+import ollama
 
-class LLM():
+class LLMProvider(ABC):
     """The LLM model."""
     def __init__(self, local_llm, base_url="http://localhost:11434"):
-        """Initialize the LLM model."""
+        """Initialize the default LLM model."""
         self.llm = ChatOpenAI(base_url=base_url, temperature=0.6, api_key=None)
 
     def generate_response(self, prompt, widget):
@@ -20,14 +22,34 @@ class LLM():
         for chunk in self.llm.stream(prompt):
             yield chunk.content
 
-class LLMOllama(LLM):
-    """The Ollama LLM model."""
-    def __init__(self, local_llm, base_url="http://localhost:11434"):
-        """Initialize the LLM model."""
-        self.llm = ChatOllama(model=local_llm, base_url=base_url, temperature=0.6)    
+    @abstractmethod
+    def get_models_list(self):
+        """Get the list of models."""
+        pass
     
-class LLMLlamaCpp(LLM):
+
+class LLMOllama(LLMProvider):
+    """The Ollama LLM model."""
+    def __init__(self, base_url="http://localhost:11434"):
+        """Initialize the LLM model."""
+        models_list = self.get_models_list()
+        self.llm = ChatOllama(model=models_list[0], base_url=base_url, temperature=0.6)   
+
+    def set_model(self, model):
+        """Set the model."""
+        self.llm.model = model
+
+    def get_models_list(self):
+        """Get the list of models."""
+        models = []
+        output = ollama.list()
+        for model in output["models"]:
+            models.append(model["name"])
+
+        return models
+    
+class LLMLlamaCpp(LLMProvider):
     """The Llama.cpp LLM model."""
-    def __init__(self, local_llm, base_url="http://localhost:8080"):
+    def __init__(self, base_url="http://localhost:8080"):
         """Initialize the LLM model."""
         self.llm = ChatOpenAI(base_url=base_url, temperature=0.6, api_key=None)

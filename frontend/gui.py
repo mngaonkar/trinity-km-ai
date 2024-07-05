@@ -1,12 +1,12 @@
 import streamlit as st
 from streamlit.components.v1 import html
 from langchain_community.chat_models import ChatOllama
-from backend.llm import LLM
+from backend.llm_provider import LLMProvider, LLMOllama
 import constants
 
 class GUI():
     def __init__(self):
-        self.chat = LLM(local_llm=constants.MODEL_NAME, base_url=constants.INFERENCE_URL_OLLAMA)
+        self.chat = LLMOllama(base_url=constants.INFERENCE_URL_OLLAMA)
 
     def run(self):
         st.set_page_config(

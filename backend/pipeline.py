@@ -5,7 +5,7 @@ from langchain_core.output_parsers import StrOutputParser
 from langchain_community.chat_message_histories import ChatMessageHistory
 from langchain_core.chat_history import BaseChatMessageHistory
 from zmq import Context
-from backend import llm
+from backend import llm_provider
 from backend.database import Database
 from backend.utils import pretty_print_docs
 import constants
@@ -17,7 +17,7 @@ from langchain.retrievers import ContextualCompressionRetriever
 from langchain.retrievers.document_compressors.cross_encoder_rerank import CrossEncoderReranker
 from langchain_community.cross_encoders import HuggingFaceCrossEncoder
 from backend.vectorstore import VectorStore
-from backend.llm import LLMOllama, LLMLlamaCpp
+from backend.llm_provider import LLMOllama, LLMLlamaCpp
 
 
 class Pipeline():
@@ -25,7 +25,8 @@ class Pipeline():
     chat_history = []
 
     def __init__(self):
-        pass
+        """Set default values."""
+        self.llm_provider_name = constants.LLM_PROVIDER_OLLAMA
         
     def setup_session_state(self, session_state = {}):
         """User specific session data"""
@@ -47,20 +48,20 @@ class Pipeline():
         input_variables=["history", "context", "question"],
         )
 
-    def setup_large_language_model(self, llm = constants.MODEL_NAME, base_url = constants.INFERENCE_URL_OLLAMA_LOCAL):
-        self.llm = LLMOllama(local_llm=constants.MODEL_NAME, base_url=constants.INFERENCE_URL_OLLAMA_LOCAL)
-        # self.llm = LLMLlamaCpp(local_llm=constants.MODEL_NAME, base_url=constants.INFERENCE_URL_LLAMA_CPP_LOCAL)
+    def setup_large_language_model_provider(self, llm = constants.MODEL_NAME, base_url = constants.INFERENCE_URL_OLLAMA_LOCAL):
+        self.llm_provider = LLMOllama(base_url=constants.INFERENCE_URL_OLLAMA_LOCAL)
+        # self.llm = LLMLlamaCpp(base_url=constants.INFERENCE_URL_LLAMA_CPP_LOCAL)
 
     def setup(self, vector_store: VectorStore):
         """Overall setup."""
         self.setup_prompt_tepmlate()
-        self.setup_large_language_model()
+        self.setup_large_language_model_provider()
         self.vector_store = vector_store
         self.vector_store.init_vectorstore(constants.DOCS_LOCATION)
-        self.setup_pipeline()
+        self.setup_chain()
         logger.info("Pipeline setup complete.")
     
-    def setup_pipeline(self):
+    def setup_chain(self):
         """Setup the pipeline for the chatbot."""
         if self.vector_store is None:
             raise ValueError("Vector store not initialized.")
@@ -113,14 +114,14 @@ class Pipeline():
             self.rag_chain = (
                 {"history":self.get_session_history, "context": get_context, "question": RunnablePassthrough()}
                 | self.prompt
-                | self.llm.llm
+                | self.llm_provider.llm
                 | StrOutputParser()
             )
         else:
             self.rag_chain = (
                 {"history":self.get_session_history, "context": get_no_context, "question": RunnablePassthrough()}
                 | self.prompt
-                | self.llm.llm
+                | self.llm_provider.llm
                 | StrOutputParser()
             )
 

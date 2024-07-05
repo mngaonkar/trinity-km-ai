@@ -1,6 +1,7 @@
 from math import log
 from multiprocessing import Pipe
 from venv import logger
+from sklearn import pipeline
 import streamlit as st
 from streamlit.components.v1 import html
 from langchain_community.chat_models import ChatOllama
@@ -9,7 +10,7 @@ import constants
 from langchain_core.language_models import LanguageModelInput
 from backend.pipeline import Pipeline
 from backend.loader import DocumentLoader
-from backend.llm import LLM
+from backend.llm_provider import LLMProvider
 import constants
 from loguru import logger
 
@@ -18,8 +19,8 @@ class ChatGUI():
     def __init__(self, pipeline: Pipeline, vector_store: VectorStore):
         logger.info("Initializing chat GUI...")
         self.pipeline = pipeline
+        self.vector_store = vector_store
         self.pipeline.setup_session_state(st.session_state)
-        pipeline.setup(vector_store)
         
         logger.info("Chat GUI initialized.")
 
@@ -28,11 +29,13 @@ class ChatGUI():
 
     def model_changed(self):
         """Model changed."""
-        pass
+        logger.info(f'Setting up large language model {st.session_state["model"]}')
+        self.pipeline.llm_provider.set_model(st.session_state["model"])
 
     def augmented_flag_changed(self):
         """Augmented flag changed."""
-        self.pipeline.setup_pipeline()
+        logger.info(f'Setting up augmentation {st.session_state["augmented_flag"]}')
+        self.pipeline.setup_chain()
 
     def run(self):
         # Set the page configuration
@@ -47,8 +50,11 @@ class ChatGUI():
         sidebar_container = st.sidebar.container()
 
         # Save use specific settings in session state
-        st.session_state["model"] = sidebar_container.selectbox("Model", constants.MODELS, on_change=self.model_changed)
-        st.session_state["augmented_flag"] = sidebar_container.checkbox("Augmented", value=False, on_change=self.augmented_flag_changed) 
+        self.pipeline.setup_large_language_model_provider()
+        models_list = self.pipeline.llm_provider.get_models_list()
+        logger.info(f"Models list: {models_list}")
+        sidebar_container.selectbox("Model", models_list, key="model", on_change=self.model_changed)
+        sidebar_container.checkbox("Augmented", value=False, key="augmented_flag", on_change=self.augmented_flag_changed) 
         if st.session_state["augmented_flag"]:
             # show a select box for the dataset selection
             st.session_state["dataset"] = sidebar_container.selectbox("Dataset", constants.DATASETS)
@@ -56,6 +62,9 @@ class ChatGUI():
         # Set a default model
         if "model" not in st.session_state:
             st.session_state["model"] = constants.MODEL_NAME
+
+        # Setup pipeline
+        self.pipeline.setup(self.vector_store)
 
         # Initialize chat history
         if "messages" not in st.session_state:
