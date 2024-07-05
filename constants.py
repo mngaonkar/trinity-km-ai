@@ -5,8 +5,6 @@ INFERENCE_URL_OLLAMA = "http://10.0.0.147:11434"
 INFERENCE_URL_LLAMA_CPP = "http://10.0.0.147:8080"
 INFERENCE_URL_LLAMA_CPP_LOCAL = "http://localhost:8080"
 INFERENCE_URL_OLLAMA_LOCAL = "http://localhost:11434"
-MODELS = ["llaama3-uncensored", "llama2-uncensored"]
-DATASETS = ["default"]
 MODEL_NAME = "llama3-uncensored"
 APP_NAME = "AltBox AI"
 APP_VERSION = "v1.0"
@@ -28,8 +26,6 @@ MAX_CHAT_HISTORY = 20
 DEFAULT_CONFIF_FILE = "config.json"
 
 DOCS_LOCATION = "/Users/mahadevgaonkar/Documents"
-
-DOC_URL = "example.com"
 
 LLM_PROVIDERS = ["ollama", "llama-cpp"] 
 LLM_PROVIDER_OLLAMA = "ollama"
