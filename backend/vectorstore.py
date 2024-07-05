@@ -4,6 +4,7 @@ from backend.database import Database
 import constants
 from backend.loader import DocumentLoader
 from configuration import Configuration, VectorStoreStatus
+import os
 
 class VectorStore():
     """Class for storing vectors."""
@@ -14,7 +15,7 @@ class VectorStore():
         self.config = config
         self.database = Database() 
         
-    def init_vectorstore(self, doc_location=constants.DOCS_LOCATION):
+    def init_vectorstore(self, db_name):
         # webpage = constants.DOC_URL
        
         # for i in range(1, 6):
@@ -25,7 +26,7 @@ class VectorStore():
         # webpage = "https://gutenberg.org/cache/epub/1661/pg1661.txt"
         # docs = self.loader.load_web_document(webpage)
         # self.chat.db.vectorstore.add_documents(docs)
-        database_name = doc_location.split("/")[-1] + ".db"
+        database_name = os.path.join(constants.DOCS_LOCATION, db_name + ".db")
 
         self.config.load_config()
         logger.debug(self.config.get_config())
@@ -48,7 +49,11 @@ class VectorStore():
         if not self.vector_db_initialized:
             logger.info("vector store not initialized, initializing...")
             self.database.create_database(database_name)
-            docs = self.loader.load_documents_from_directory(doc_location)
+            db_file_path = os.path.join(constants.DOCS_LOCATION, db_name)
+            docs = self.loader.load_documents_from_directory(db_file_path)
+            if len(docs) == 0:
+                logger.error("No documents found.")
+                return
             logger.info(f"Adding {len(docs)} documents to vector store")
             self.database.store_documents(docs)
             logger.info("Done.")

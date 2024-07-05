@@ -27,6 +27,7 @@ class Pipeline():
     def __init__(self):
         """Set default values."""
         self.llm_provider_name = constants.LLM_PROVIDER_OLLAMA
+        self.retriever = None
         
     def setup_session_state(self, session_state = {}):
         """User specific session data"""
@@ -57,7 +58,8 @@ class Pipeline():
         self.setup_prompt_tepmlate()
         self.setup_large_language_model_provider()
         self.vector_store = vector_store
-        self.vector_store.init_vectorstore(constants.DOCS_LOCATION)
+        if self.session_state["augmented_flag"]:
+            self.vector_store.init_vectorstore(self.session_state["dataset"])
         self.setup_chain()
         logger.info("Pipeline setup complete.")
     
@@ -66,7 +68,8 @@ class Pipeline():
         if self.vector_store is None:
             raise ValueError("Vector store not initialized.")
         
-        self.retriever = self.vector_store.database.vector_db.as_retriever()
+        if self.session_state["augmented_flag"]:
+            self.retriever = self.vector_store.database.vector_db.as_retriever()
 
         def format_docs(docs):
             return "\n\n".join(doc.page_content for doc in docs)

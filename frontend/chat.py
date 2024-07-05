@@ -32,10 +32,20 @@ class ChatGUI():
         logger.info(f'Setting up large language model {st.session_state["model"]}')
         self.pipeline.llm_provider.set_model(st.session_state["model"])
 
+    def provider_changed(self):
+        """Provider changed."""
+        pass
+
     def augmented_flag_changed(self):
         """Augmented flag changed."""
         logger.info(f'Setting up augmentation {st.session_state["augmented_flag"]}')
-        self.pipeline.setup_chain()
+       
+        # self.pipeline.setup(self.vector_store)
+    
+    def dataset_changed(self):
+        """Dataset changed."""
+        logger.info(f'Setting up datset {st.session_state["dataset"]}')
+        self.pipeline.vector_store.init_vectorstore(st.session_state["dataset"])
 
     def run(self):
         # Set the page configuration
@@ -47,17 +57,21 @@ class ChatGUI():
 
         st.title(constants.APP_NAME + " " + constants.APP_VERSION)
         chat_container = st.container()
-        sidebar_container = st.sidebar.container()
+        self.sidebar_container = st.sidebar.container()
 
         # Save use specific settings in session state
         self.pipeline.setup_large_language_model_provider()
         models_list = self.pipeline.llm_provider.get_models_list()
         logger.info(f"Models list: {models_list}")
-        sidebar_container.selectbox("Model", models_list, key="model", on_change=self.model_changed)
-        sidebar_container.checkbox("Augmented", value=False, key="augmented_flag", on_change=self.augmented_flag_changed) 
-        if st.session_state["augmented_flag"]:
-            # show a select box for the dataset selection
-            st.session_state["dataset"] = sidebar_container.selectbox("Dataset", constants.DATASETS)
+        self.sidebar_container.selectbox("Model Provider", constants.LLM_PROVIDERS, key="provider", index=0, on_change=self.provider_changed)
+        self.sidebar_container.selectbox("Model", models_list, key="model", index=0, on_change=self.model_changed)
+        augmented = self.sidebar_container.checkbox("Augmented", value=False, key="augmented_flag", on_change=self.augmented_flag_changed) 
+        
+        # show a select box for the dataset selection
+        if augmented:
+            db_files = self.vector_store.database.list_databases()
+            self.sidebar_container.selectbox("Dataset", db_files, key="dataset", index=0, on_change=self.dataset_changed)
+            self.pipeline.setup(self.vector_store)
         
         # Set a default model
         if "model" not in st.session_state:

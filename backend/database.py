@@ -47,3 +47,9 @@ class Database():
         docs = self.vector_db.similarity_search_with_score(query, k=constants.NO_DOCS_PER_QUERY)
         logger.info(f"Found {len(docs)} documents.")
         return docs
+    
+    def list_databases(self):
+        """Get all the database."""
+        all_files = os.listdir(constants.DB_FILES_LOCATION)
+        db_files = [f.split(".db")[0] for f in all_files if f.endswith(".db")]
+        return db_files
