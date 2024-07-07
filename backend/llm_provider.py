@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from loguru import logger
 from langchain_community.chat_models import ChatOllama
 from langchain_community.llms import LlamaCpp
 from langchain_openai import ChatOpenAI
@@ -30,14 +31,22 @@ class LLMProvider(ABC):
 
 class LLMOllama(LLMProvider):
     """The Ollama LLM model."""
-    def __init__(self, base_url="http://localhost:11434"):
+    def __init__(self, base_url="http://localhost:11434", model=None):
         """Initialize the LLM model."""
         models_list = self.get_models_list()
-        self.llm = ChatOllama(model=models_list[0], base_url=base_url, temperature=0.6)   
+        if model is None:
+            logger.info(f"Setting up default model {models_list[0]}")
+            self.llm = ChatOllama(model=models_list[0], base_url=base_url, temperature=0.6)   
+        else:
+            logger.info(f"Setting up model from session state {model}")
+            self.llm = ChatOllama(model=model, base_url=base_url, temperature=0.6)
+
 
     def set_model(self, model):
         """Set the model."""
         self.llm.model = model
+        logger.info(f"Setting model to {model}")
+        self.llm = ChatOllama(model=self.llm.model, base_url=self.llm.base_url, temperature=0.6)
 
     def get_models_list(self):
         """Get the list of models."""

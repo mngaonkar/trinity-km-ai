@@ -1,5 +1,6 @@
 from math import log
 from multiprocessing import Pipe
+from pyexpat import model
 from venv import logger
 from sklearn import pipeline
 import streamlit as st
@@ -29,8 +30,8 @@ class ChatGUI():
 
     def model_changed(self):
         """Model changed."""
-        logger.info(f'Setting up large language model {st.session_state["model"]}')
-        self.pipeline.llm_provider.set_model(st.session_state["model"])
+        logger.info(f'Different model selected {st.session_state["model"]}')
+        self.pipeline.setup_large_language_model_provider(model=st.session_state["model"])
 
     def provider_changed(self):
         """Provider changed."""
@@ -75,6 +76,7 @@ class ChatGUI():
         
         # Set a default model
         if "model" not in st.session_state:
+            logger.info(f"Setting default model {constants.MODEL_NAME}")
             st.session_state["model"] = constants.MODEL_NAME
 
         # Setup pipeline
