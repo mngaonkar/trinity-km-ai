@@ -25,9 +25,7 @@ MAX_CHAT_HISTORY = 20
 
 DEFAULT_CONFIF_FILE = "config.json"
 
-DOCS_LOCATION = "/Users/mahadevgaonkar/Documents"
+DOCS_LOCATION = "/home/mahadev/Documents" # update to correct document location.
 
 LLM_PROVIDERS = ["ollama", "llama-cpp"] 
 LLM_PROVIDER_OLLAMA = "ollama"
-
-DB_FILES_LOCATION = "/Users/mahadevgaonkar/Documents/"

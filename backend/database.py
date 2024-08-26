@@ -50,6 +50,6 @@ class Database():
     
     def list_databases(self):
         """Get all the database."""
-        all_files = os.listdir(constants.DB_FILES_LOCATION)
+        all_files = os.listdir(constants.DOCS_LOCATION)
         db_files = [f.split(".db")[0] for f in all_files if f.endswith(".db")]
         return db_files
