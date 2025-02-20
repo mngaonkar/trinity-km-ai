@@ -49,7 +49,7 @@ class Pipeline():
         input_variables=["history", "context", "question"],
         )
 
-    def setup_large_language_model_provider(self, model = constants.MODEL_NAME, base_url = constants.INFERENCE_URL_OLLAMA_LOCAL):
+    def setup_large_language_model_provider(self, model = constants.MODEL_NAME, base_url = constants.INFERENCE_URL_OLLAMA):
         logger.debug(f"session state = {self.session_state}")
         logger.info(f"Setting up LLM provider with model {model} and base url {base_url}")
         self.llm_provider = LLMOllama(base_url=base_url, model=model)
@@ -60,7 +60,7 @@ class Pipeline():
         self.setup_prompt_tepmlate()
         self.setup_large_language_model_provider(self.session_state["model"])
         self.vector_store = vector_store
-        if self.session_state["augmented_flag"]:
+        if self.session_state.get("augmented_flag"):
             self.vector_store.init_vectorstore(self.session_state["dataset"])
         self.setup_chain()
         logger.info("Pipeline setup complete.")
@@ -70,7 +70,7 @@ class Pipeline():
         if self.vector_store is None:
             raise ValueError("Vector store not initialized.")
         
-        if self.session_state["augmented_flag"]:
+        if self.session_state.get("augmented_flag"):
             self.retriever = self.vector_store.database.vector_db.as_retriever()
 
         def format_docs(docs):
