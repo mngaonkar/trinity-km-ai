@@ -58,7 +58,7 @@ class Pipeline():
     def setup(self, vector_store: VectorStore):
         """Overall setup."""
         self.setup_prompt_tepmlate()
-        self.setup_large_language_model_provider(self.session_state["model"])
+        self.setup_large_language_model_provider(self.session_state["model"], constants.INFERENCE_URL_OLLAMA)
         self.vector_store = vector_store
         if self.session_state.get("augmented_flag"):
             self.vector_store.init_vectorstore(self.session_state["dataset"])
