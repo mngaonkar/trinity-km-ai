@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from http import client
 from loguru import logger
 from langchain_community.chat_models import ChatOllama
 from langchain_community.llms import LlamaCpp
@@ -33,6 +34,7 @@ class LLMOllama(LLMProvider):
     """The Ollama LLM model."""
     def __init__(self, base_url="http://localhost:11434", model=None):
         """Initialize the LLM model."""
+        self.base_url = base_url
         models_list = self.get_models_list()
         if model is None:
             logger.info(f"Setting up default model {models_list[0]}")
@@ -51,9 +53,11 @@ class LLMOllama(LLMProvider):
     def get_models_list(self):
         """Get the list of models."""
         models = []
-        output = ollama.list()
+        client = ollama.Client(host=self.base_url)
+        output = client.list()
+        logger.info(f"Models available: {output}")
         for model in output["models"]:
-            models.append(model["name"])
+            models.append(model["model"])
 
         return models
     
