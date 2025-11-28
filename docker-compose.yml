@@ -1,0 +1,47 @@
+# Docker Compose file for trinity-km-ai
+version: '3.8'
+
+services:
+  trinity-km-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8501:8501"
+    volumes:
+      # Mount data directory for persistence
+      - ./data:/app/data
+      - ./config.json:/app/config.json
+      # Mount logs directory
+      - ./logs:/app/logs
+    environment:
+      - PYTHONPATH=/app
+      - PYTHONUNBUFFERED=1
+      # Override inference URLs for containerized environment
+      - INFERENCE_URL_OLLAMA=http://ollama:11434
+      - INFERENCE_URL_LLAMA_CPP=http://llama-cpp:8080
+    depends_on:
+      - ollama
+    networks:
+      - trinity-network
+    restart: unless-stopped
+
+  # Optional: Ollama service for local LLM inference
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    networks:
+      - trinity-network
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
+
+networks:
+  trinity-network:
+    driver: bridge
